@@ -39,7 +39,10 @@ app = Flask(__name__)
 
 @app.route('/api/lanes')
 def lanes():
-    return render_template('lanes.html')
+    input = ((255 - np.array(request.json, dtype=np.uint8)) / 255.0).reshape(1, 784)
+    output2 = simple(input)
+    output1 = convolutional(input)
+    return jsonify(results=[output1, output2])
     
 @app.route('/api/mnist', methods=['POST'])
 def mnist():
@@ -47,6 +50,10 @@ def mnist():
     output1 = simple(input)
     output2 = convolutional(input)
     return jsonify(results=[output1, output2])
+
+@app.route('/remix')
+def lanes():
+    return render_template('lanes.html')
 
 @app.route('/')
 def main():
