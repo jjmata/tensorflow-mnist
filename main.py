@@ -52,7 +52,7 @@ def mnist():
     return jsonify(results=[output1, output2])
 
 @app.route('/remix')
-def lanes():
+def remix():
     return render_template('lanes.html')
 
 @app.route('/')
