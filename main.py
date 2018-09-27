@@ -2,6 +2,7 @@
 import tensorflow as tf
 import numpy as np
 
+# MNIST methods
 import sys
 sys.path.append('mnist')
 import model
@@ -24,11 +25,22 @@ saver.restore(sess, "mnist/data/convolutional.ckpt")
 def convolutional(input):
     return sess.run(y2, feed_dict={x: input, keep_prob: 1.0}).flatten().tolist()
 
+# Remix APIs
+def inceptionV3():
+    return "TBD"
+
+def remix_guess():
+    return "TBD"
+
 # webapp
 from flask import Flask, jsonify, render_template, request
 
 app = Flask(__name__)
 
+@app.route('/api/lanes', methods=['POST'])
+def mnist():
+    return render_template('lanes.html')
+    
 @app.route('/api/mnist', methods=['POST'])
 def mnist():
     input = ((255 - np.array(request.json, dtype=np.uint8)) / 255.0).reshape(1, 784)
