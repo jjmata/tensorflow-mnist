@@ -38,7 +38,7 @@ from flask import Flask, jsonify, render_template, request
 app = Flask(__name__)
 
 @app.route('/api/lanes', methods=['POST'])
-def mnist():
+def lanes():
     return render_template('lanes.html')
     
 @app.route('/api/mnist', methods=['POST'])
