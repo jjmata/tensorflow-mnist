@@ -37,7 +37,7 @@ from flask import Flask, jsonify, render_template, request
 
 app = Flask(__name__)
 
-@app.route('/api/lanes', methods=['POST'])
+@app.route('/api/lanes')
 def lanes():
     return render_template('lanes.html')
     
