@@ -1,7 +1,6 @@
 opencv-python
 fiona
 numpy<=1.14.5,>=1.13.3
-GDAL==1.10.0
 rasterio==0.36.0
 Flask==0.10.1
 gunicorn==19.3.0
