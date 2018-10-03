@@ -8,7 +8,7 @@ RUN apt-get update -y && \
 
 # Install needed binary packages for pip installation and spatial requirements
 RUN apt-get update -y && \
-    apt-get install -y libsm6 libxext6 curl python-pip && \
+    apt-get install -y libsm6 libxext6 curl vim python-pip && \
     apt-get install -y python-cairo libgeos-c1v5 libgdal20 python-gdal \
         python-pip python-dev libpq-dev memcached libffi-dev gdal-bin libgdal-dev
 
@@ -21,7 +21,6 @@ COPY mnist            /usr/local/src/roadclassifier/mnist
 COPY src              /usr/local/src/roadclassifier/src
 COPY static           /usr/local/src/roadclassifier/static
 COPY submodules       /usr/local/src/roadclassifier/submodules
-COPY app.json         /usr/local/src/roadclassifier
 COPY gulpfile.js      /usr/local/src/roadclassifier
 COPY main.py          /usr/local/src/roadclassifier
 COPY package.json     /usr/local/src/roadclassifier
@@ -38,4 +37,4 @@ RUN npm install
 VOLUME ["/data"]
 EXPOSE 5000
 
-CMD gunicorn -w4 -b 0.0.0.0:5000 main:app --log-file=-
+CMD gunicorn -w4 -b 0.0.0.0:5000 main:app --reload --log-file=-

@@ -25,11 +25,11 @@ saver.restore(sess, "mnist/data/convolutional.ckpt")
 def convolutional(input):
     return sess.run(y2, feed_dict={x: input, keep_prob: 1.0}).flatten().tolist()
 
-# Remix APIs
-def inceptionV3():
+# Remix API methods
+def inceptionV3(input):
     return "TBD"
 
-def remix_guess():
+def remix_guess(input):
     return "TBD"
 
 # webapp
@@ -39,9 +39,9 @@ app = Flask(__name__)
 
 @app.route('/api/lanes')
 def lanes():
-    input = ((255 - np.array(request.json, dtype=np.uint8)) / 255.0).reshape(1, 784)
-    output2 = simple(input)
-    output1 = convolutional(input)
+    input = request.json
+    output1 = inceptionV3(input)
+    output2 = remix_guess(input)
     return jsonify(results=[output1, output2])
     
 @app.route('/api/mnist', methods=['POST'])
