@@ -1,6 +1,15 @@
-# restore trained data
+import sys
+import os
 import tensorflow as tf
 import numpy as np
+import rasterio
+import cv2
+import base64
+import tensorflow as tf
+from affine import Affine
+from rasterio._base import _transform
+
+os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 
 # MNIST methods
 import sys
@@ -26,8 +35,61 @@ def convolutional(input):
     return sess.run(y2, feed_dict={x: input, keep_prob: 1.0}).flatten().tolist()
 
 # Remix API methods
-def inceptionV3(input):
-    return "TBD"
+tile_size = [512, 512]
+model_dir = '/data/remix/'
+raster_file = model_dir + 'ORCEUG17-merc-cloud.tif'
+
+def inceptionV3(tile_size, model_dir, lon, lat):
+
+    output_array = []
+    offset = 5480378.654 - 5450650
+
+    with rasterio.open(raster_file) as src:
+        dst_crs = src.crs
+        transform = src.transform
+        rev = ~Affine.from_gdal(*transform)
+
+    src_crs = {'init': 'EPSG:4326'}
+    x,y = _transform(src_crs, dst_crs, [lon], [lat], None)
+
+    coordinates = [x[0], y[0] + offset]
+    #Transform the point coordinates
+    coordinates = rev*coordinates
+
+    #Extract the point Id to label the tile
+    id = int(abs(lat*lon))
+    min = [c - tile_size[1]/2 for c in coordinates]
+    max = [c + tile_size[0]/2 for c in coordinates]
+
+    with rasterio.open(raster_file) as src:
+        r, g, b = src.read(window=((min[1], max[1]), (min[0], max[0])))
+        tile = cv2.merge((b, g, r))
+
+        label_lines = [line.rstrip() for line
+                       in tf.gfile.GFile(model_dir + "retrained_labels-4_4N_5_7.txt")]
+        with tf.gfile.FastGFile(model_dir + "retrained_graph-4_4N_5_7.pb", 'rb') as f:
+            graph_def = tf.GraphDef()
+            graph_def.ParseFromString(f.read())
+            _ = tf.import_graph_def(graph_def, name='')
+
+        with tf.Session() as sess:
+
+            softmax_tensor = sess.graph.get_tensor_by_name('final_result:0')
+
+            tile_str = cv2.imencode('.jpg', tile)[1].tostring()
+            predictions = sess.run(softmax_tensor, \
+                     {'DecodeJpeg/contents:0': tile_str})
+
+            top_k = predictions[0].argsort()[-len(predictions[0]):][::-1]
+
+            for node_id in top_k:
+                human_string = label_lines[node_id]
+                score = predictions[0][node_id]
+                output_array.append([str(human_string), str(score)])
+
+            output_array.append(["img_base64", base64.b64encode(tile_str)])
+
+    return output_array
 
 def remix_guess(input):
     return "TBD"
@@ -37,13 +99,14 @@ from flask import Flask, jsonify, render_template, request
 
 app = Flask(__name__)
 
-@app.route('/api/lanes')
+@app.route('/api/lanes', methods=['GET'])
 def lanes():
-    input = request.json
-    output1 = inceptionV3(input)
+    lon = request.args.get('lon')
+    lat = request.args.get('lat')
+    output1 = inceptionV3(tile_size, model_dir, float(lon), float(lat))
     output2 = remix_guess(input)
     return jsonify(results=[output1, output2])
-    
+
 @app.route('/api/mnist', methods=['POST'])
 def mnist():
     input = ((255 - np.array(request.json, dtype=np.uint8)) / 255.0).reshape(1, 784)

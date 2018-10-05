@@ -16,6 +16,12 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
 RUN apt-get update -y && \
     apt-get install -y nodejs
 
+WORKDIR /usr/local/src/roadclassifier
+
+COPY requirements.txt /usr/local/src/roadclassifier
+RUN cd /usr/local/src/roadclassifier && \
+    pip install -Ur requirements.txt
+
 COPY inceptionV3      /usr/local/src/roadclassifier/inceptionV3
 COPY mnist            /usr/local/src/roadclassifier/mnist
 COPY src              /usr/local/src/roadclassifier/src
@@ -25,13 +31,10 @@ COPY gulpfile.js      /usr/local/src/roadclassifier
 COPY main.py          /usr/local/src/roadclassifier
 COPY package.json     /usr/local/src/roadclassifier
 COPY templates        /usr/local/src/roadclassifier/templates
-COPY requirements.txt /usr/local/src/roadclassifier
-RUN cd /usr/local/src/roadclassifier && \
-    pip install -Ur requirements.txt
 
-WORKDIR /usr/local/src/roadclassifier
-
+RUN npm install -g gulp
 RUN npm install
+RUN gulp
 
 # mount-point for persistence beyond container
 VOLUME ["/data"]
