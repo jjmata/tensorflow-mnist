@@ -42,7 +42,6 @@ raster_file = model_dir + 'ORCEUG17-merc-cloud.tif'
 def inceptionV3(tile_size, model_dir, lon, lat):
 
     output_array = []
-    offset = 5480378.654 - 5450650
 
     with rasterio.open(raster_file) as src:
         dst_crs = src.crs
@@ -52,7 +51,7 @@ def inceptionV3(tile_size, model_dir, lon, lat):
     src_crs = {'init': 'EPSG:4326'}
     x,y = _transform(src_crs, dst_crs, [lon], [lat], None)
 
-    coordinates = [x[0], y[0] + offset]
+    coordinates = [x[0], y[0]]
     #Transform the point coordinates
     coordinates = rev*coordinates
 
@@ -82,12 +81,11 @@ def inceptionV3(tile_size, model_dir, lon, lat):
 
             top_k = predictions[0].argsort()[-len(predictions[0]):][::-1]
 
+            output_array.append(["img_base64", "data:image/  jpg;base64," + base64.b64encode(tile_str)])
             for node_id in top_k:
                 human_string = label_lines[node_id]
                 score = predictions[0][node_id]
                 output_array.append([str(human_string), str(score)])
-
-            output_array.append(["img_base64", base64.b64encode(tile_str)])
 
     return output_array
 
