@@ -53,7 +53,7 @@
             center: [-123.10, 44.05], // starting position
             zoom: 15 // starting zoom
         });
-        
+
         map.on('mousemove', function (e) {
             document.getElementById('info').innerHTML =
                 // e.point is the x, y coordinates of the mousemove event relative
@@ -62,7 +62,7 @@
                 // e.lngLat is the longitude, latitude geographical position of the event
                 JSON.stringify(e.lngLat);
         });
-      
+
         map.on('mouseup', function (e) {
           document.getElementById('info').innerHTML =
                 // e.point is the x, y coordinates of the mousemove event relative
@@ -84,15 +84,30 @@
                           };
                           image.src = data.results[0][0][1];
 
-                          for (var i = 0; i < 2; i++) {
+                          var new_tbody = document.createElement('tbody');
+                          trow = document.createElement("tr");
+                          tcell = document.createElement("td");
+                  			  tcell.appendChild(document.createTextNode(""));
+                  			  trow.appendChild(tcell);
+                          for (var i = 0; i < data.results.length; i++) { // InceptionV3 + Remix/OSM
                               var max = 0;
                               var max_index = 0;
-                              for (var j = 0; j < 10; j++) {
-                                  var value = Math.round(data.results[i][j] * 1000);
+
+                              var label = data.results[i][0][0];
+                              tcell = document.createElement("td");
+                  			      tcell.appendChild(document.createTextNode(label));
+                  			      trow.appendChild(tcell);
+                          }
+                          new_tbody.appendChild(trow);
+                          $('#output tbody').replaceWith(new_tbody);
+                          for (var i = 0; i < data.results[0].length; i++) { // InceptionV3 + Remix/OSM
+                              for (var j = 1; j < data.results[i].length; j++) {
+                                  var value = Math.round(data.results[i][j][1] * 1000);
                                   if (value > max) {
                                       max = value;
                                       max_index = j;
                                   }
+                                  var label = data.results[i][j][0];
                                   var digits = String(value).length;
                                   for (var k = 0; k < 3 - digits; k++) {
                                       value = '0' + value;
@@ -101,20 +116,31 @@
                                   if (value > 999) {
                                       text = '1.000';
                                   }
-                                  $('#output tr').eq(j + 1).find('td').eq(i).text(text);
+                                  trow = document.createElement("tr");
+                                  tcell = document.createElement("td");
+                        				  tcell.appendChild(document.createTextNode(label));
+                        				  trow.appendChild(tcell);
+                                  tcell = document.createElement("td");
+                                  tcell.appendChild(document.createTextNode(text));
+                        				  trow.appendChild(tcell);
+                                  tcell = document.createElement("td");
+                                  tcell.appendChild(document.createTextNode("TBD"));
+	                        			  trow.appendChild(tcell);
+                                  new_tbody.appendChild(trow);
                               }
+                              $('#output tbody').replaceWith(new_tbody);
                               for (var j = 0; j < 10; j++) {
                                   if (j === max_index) {
-                                      $('#output tr').eq(j + 1).find('td').eq(i).addClass('success');
+                                      $('#output tr').eq(j).find('td').eq(i).addClass('success');
                                   } else {
-                                      $('#output tr').eq(j + 1).find('td').eq(i).removeClass('success');
+                                      $('#output tr').eq(j).find('td').eq(i).removeClass('success');
+                                  }
                                   }
                               }
                           }
-                      }
                   });
         });
-         
+
       </script>
 
     <div class="container">

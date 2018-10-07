@@ -81,7 +81,7 @@ def inceptionV3(tile_size, model_dir, lon, lat):
 
             top_k = predictions[0].argsort()[-len(predictions[0]):][::-1]
 
-            output_array.append(["img_base64", "data:image/  jpg;base64," + base64.b64encode(tile_str)])
+            output_array.append(["Inception v3", "data:image/  jpg;base64," + base64.b64encode(tile_str)])
             for node_id in top_k:
                 human_string = label_lines[node_id]
                 score = predictions[0][node_id]
@@ -90,7 +90,7 @@ def inceptionV3(tile_size, model_dir, lon, lat):
     return output_array
 
 def remix_guess(input):
-    return "TBD"
+    return([["Remix/OSM", "TBD"]])
 
 # webapp
 from flask import Flask, jsonify, render_template, request
