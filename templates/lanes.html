@@ -100,7 +100,7 @@
                           }
                           new_tbody.appendChild(trow);
                           $('#output tbody').replaceWith(new_tbody);
-                          for (var i = 0; i < data.results[0].length; i++) { // InceptionV3 + Remix/OSM
+                          for (var i = 0; i < data.results.length; i++) { // InceptionV3 + Remix/OSM
                               for (var j = 1; j < data.results[i].length; j++) {
                                   var value = Math.round(data.results[i][j][1] * 1000);
                                   if (value > max) {
